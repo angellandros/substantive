@@ -61,7 +61,7 @@ def main(endings):
         print('%s\t%.2f\t%.2f\t%.2f' % (ending, frequ['m'] * 100, frequ['f'] * 100, frequ['n'] * 100))
 
 
-def main2(n_m, n_f, n_n, sort_method, min_freq, min_count):
+def main2(n_m, n_f, n_n, sort_method, min_freq, min_count, suffix_free=False):
     anal = Analyzer().load().extract_endings(10)
     freq = [(word, gs) for word, gs
             in anal.endings.items()
@@ -75,6 +75,22 @@ def main2(n_m, n_f, n_n, sort_method, min_freq, min_count):
     freq_m = list(filter(lambda x: x[1].most_freq_key() == 'm', freq))
     freq_f = list(filter(lambda x: x[1].most_freq_key() == 'f', freq))
     freq_n = list(filter(lambda x: x[1].most_freq_key() == 'n', freq))
+
+    def free_suffix(l, count=50):
+        result = []
+        words = set()
+        for word, gs in l:
+            if not any([word.endswith(previous_word) for previous_word in words]):
+                result.append((word, gs))
+                words.add(word)
+                if len(result) >= count:
+                    return result
+        return result
+
+    if suffix_free:
+        freq_m = free_suffix(freq_m)
+        freq_f = free_suffix(freq_f)
+        freq_n = free_suffix(freq_n)
     for word, gs in (freq_m[:n_m] + freq_f[:n_f] + freq_n[:n_n]):
         total = gs.count()
         print('-{:9s} & {:3.2f} & {:3.2f} & {:3.2f} & {} \\\\'.format(
@@ -91,6 +107,7 @@ if __name__ == '__main__':
     cmdline_parser.add_argument('-e', '--endings', type=str, nargs='+', help='endings to extract info about')
     cmdline_parser.add_argument('--min-count', type=int, default=5)
     cmdline_parser.add_argument('--min-freq', type=float, default=0.8)
+    cmdline_parser.add_argument('-x', '--suffix-free', type=bool)
 
     args, unknowns = cmdline_parser.parse_known_args()
 
@@ -105,4 +122,4 @@ if __name__ == '__main__':
     if args.endings is not None:
         main(args.endings)
 
-    main2(args.m, args.f, args.n, args.sort, args.min_freq, args.min_count)
+    main2(args.m, args.f, args.n, args.sort, args.min_freq, args.min_count, args.suffix_free)
