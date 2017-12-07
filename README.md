@@ -12,4 +12,7 @@ Download [dict.cc](http://www1.dict.cc/translation_file_request.php) and use the
   sort | uniq > dict.cc_nouns_with_gender.txt
 ```
 
+## Result
+
+![The Ultimate Der/Die/Das Chart](der-die-das-1.png)
 
